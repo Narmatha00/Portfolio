@@ -1,0 +1,310 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narmatha S - Creative Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000000; /* Complete black background */
+            color: #ffffff; /* White text */
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 191, 255, 0.3); /* Blue shadow for hover */
+        }
+        .glow-button {
+            position: relative;
+            overflow: hidden;
+        }
+        .glow-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 191, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        .glow-button:hover::before {
+            left: 100%;
+        }
+        .skill-card {
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #mobile-menu {
+            transition: max-height 0.3s ease-in-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+        #mobile-menu.open {
+            max-height: 500px;
+        }
+        /* Hamburger Animation */
+        #menu-toggle .bar {
+            transition: all 0.3s ease;
+        }
+        #menu-toggle.open .bar:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        #menu-toggle.open .bar:nth-child(2) {
+            opacity: 0;
+        }
+        #menu-toggle.open .bar:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-gray-900 bg-opacity-90 p-4 sticky top-0 z-10 backdrop-blur-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-500">Narmatha S</h1> <!-- Blue heading -->
+            <!-- Hamburger Button -->
+            <button id="menu-toggle" class="focus:outline-none">
+                <div class="w-6 h-5 relative">
+                    <span class="bar block w-full h-1 bg-blue-500 mb-1.5 rounded"></span> <!-- Blue bars -->
+                    <span class="bar block w-full h-1 bg-blue-500 mb-1.5 rounded"></span>
+                    <span class="bar block w-full h-1 bg-blue-500 rounded"></span>
+                </div>
+            </button>
+            <!-- Desktop Menu -->
+            <ul class="hidden lg:flex space-x-6 text-lg text-white">
+                <li><a href="#profile" class="hover:text-blue-300 transition-colors">Profile Summary</a></li>
+                <li><a href="#education" class="hover:text-blue-300 transition-colors">Education</a></li>
+                <li><a href="#projects" class="hover:text-blue-300 transition-colors">Projects</a></li>
+                <li><a href="#skills" class="hover:text-blue-300 transition-colors">Skills</a></li>
+                <li><a href="#certifications" class="hover:text-blue-300 transition-colors">Certifications</a></li>
+                <li><a href="#contact" class="hover:text-blue-300 transition-colors">Contact</a></li>
+            </ul>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="bg-gray-900 text-white">
+            <ul class="space-y-2 p-4">
+                <li><a href="#profile" class="block hover:text-blue-300 transition-colors">Profile Summary</a></li>
+                <li><a href="#education" class="block hover:text-blue-300 transition-colors">Education</a></li>
+                <li><a href="#projects" class="block hover:text-blue-300 transition-colors">Projects</a></li>
+                <li><a href="#skills" class="block hover:text-blue-300 transition-colors">Skills</a></li>
+                <li><a href="#certifications" class="block hover:text-blue-300 transition-colors">Certifications</a></li>
+                <li><a href="#contact" class="block hover:text-blue-300 transition-colors">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Profile Summary Section -->
+    <section id="profile" class="min-h-screen flex items-center py-16">
+        <div class="container mx-auto text-center px-4">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-500">Profile Summary</h2> <!-- Blue heading -->
+            <p class="text-lg text-white max-w-2xl mx-auto mb-8">
+                I am Narmatha S, proficient in Python, Java, and Object-Oriented Programming (OOPs). I focus on developing clean, efficient code and continuously enhancing my problem-solving skills. With a commitment to learning and adaptability, I aim to contribute effectively to professional and collaborative environments.
+            </p>
+            <a href="#contact" class="glow-button inline-block bg-blue-500 text-white py-2 px-6 rounded-full font-medium hover:bg-blue-600 transition-colors">
+                Let's Connect
+            </a>
+        </div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education" class="py-16 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-blue-500">Education</h2> <!-- Blue heading -->
+            <div class="max-w-2xl mx-auto">
+                <div class="card bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-blue-500 mb-3">Bachelor of Engineering in Computer Science and Engineering</h3> <!-- Blue heading -->
+                    <p class="text-white mb-2">Ultra College of Engineering and Technology, affiliated with Anna University, Chennai</p>
+                    <p class="text-white mb-2">2021 – 2025</p>
+                    <p class="text-white">CGPA: 8.0</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-16 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-blue-500">My Creations</h2> <!-- Blue heading -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                <div class="card bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-blue-500 mb-3">Smart Ration Distribution System</h3> <!-- Blue heading -->
+                    <p class="text-white mb-4">
+                        A smart system built with C++, Arduino, and RFID to streamline inventory management and ensure fair distribution via automation and real-time tracking.
+                    </p>
+                    <a href="https://drive.google.com/file/d/1pCOUbX-3IfZN-tXyhwQ341dXGbdeMF-y/view?usp=sharing" target="_blank" class="text-blue-400 hover:text-blue-300 font-medium">
+                        Watch Demo Video
+                    </a>
+                </div>
+                <div class="card bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-blue-500 mb-3">E-Voting System</h3> <!-- Blue heading -->
+                    <p class="text-white mb-4">
+                        A secure E-Voting system using Python and Blockchain for transparent, tamper-proof remote voting with login-based authentication.
+                    </p>
+                    <a href="https://github.com/Narmatha00/e-voting-system" target="_blank" class="text-blue-400 hover:text-blue-300 font-medium">
+                        Explore Project
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-blue-500">My Skills</h2> <!-- Blue heading -->
+            <div class="max-w-5xl mx-auto space-y-12">
+                <!-- Programming Skills -->
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-500 text-center mb-6">Programming Skills</h3> <!-- Blue heading -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4">
+                        <div class="skill-card card bg-gray-800 rounded-lg p-4 text-center">
+                            <h4 class="text-base font-semibold text-blue-500">Python</h4> <!-- Blue heading -->
+                        </div>
+                        <div class="skill-card card bg-gray-800 rounded-lg p-4 text-center">
+                            <h4 class="text-base font-semibold text-blue-500">Java</h4> <!-- Blue heading -->
+                        </div>
+                        <div class="skill-card card bg-gray-800 rounded-lg p-4 text-center">
+                            <h4 class="text-base font-semibold text-blue-500">SQL</h4> <!-- Blue heading -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Area of Interest -->
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-500 text-center mb-6">Area of Interest</h3> <!-- Blue heading -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4">
+                        <div class="skill-card card bg-gray-800 rounded-lg p-4 text-center">
+                            <h4 class="text-base font-semibold text-blue-500">Data Science</h4> <!-- Blue heading -->
+                        </div>
+                        <div class="skill-card card bg-gray-800 rounded-lg p-4 text-center">
+                            <h4 class="text-base font-semibold text-blue-500">Machine Learning</h4> <!-- Blue heading -->
+                        </div>
+                        <div class="skill-card card bg-gray-800 rounded-lg p-4 text-center">
+                            <h4 class="text-base font-semibold text-blue-500">Generative AI</h4> <!-- Blue heading -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certifications Section -->
+    <section id="certifications" class="py-16 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-blue-500">My Certifications</h2> <!-- Blue heading -->
+            <div class="max-w-2xl mx-auto">
+                <div class="card bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-blue-500 mb-3">Professional Certifications</h3> <!-- Blue heading -->
+                    <p class="text-white mb-4">
+                        Explore my certifications in Data Science, AI/ML, Cloud, and more, showcasing my expertise and commitment to learning.
+                    </p>
+                    <a href="https://drive.google.com/drive/folders/1jW9YFkRuC7wUkqZ3gVrZPx4yBSE7zYPK?usp=sharing" target="_blank" class="text-blue-400 hover:text-blue-300 font-medium">
+                        View Certifications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16">
+        <div class="container mx-auto text-center px-4">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 text-blue-500">Get in Touch</h2> <!-- Blue heading -->
+            <p class="text-lg text-white mb-6 max-w-2xl mx-auto">
+               💼 Open to Work | 🤝 Open to Contribute
+Always happy to connect, collaborate, and grow together.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="mailto:snarmathamoorthy@gmail.com" target="_blank" class="glow-button bg-blue-500 text-white py-2 px-6 rounded-full font-medium hover:bg-blue-600 transition-colors">
+                    Say Hello 👋
+                </a>
+                <a href="https://www.linkedin.com/in/s-narmatha-073816253" target="_blank" class="text-blue-400 hover:text-blue-300 font-medium">
+                    LinkedIn
+                </a>
+                <a href="https://github.com/Narmatha00" target="_blank" class="text-blue-400 hover:text-blue-300 font-medium">
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-950 py-6">
+        <div class="container mx-auto text-center text-white">
+            <p>© 2025 Narmatha S. Crafted with creativity.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Hamburger menu toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+            menuToggle.classList.toggle('open');
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                    mobileMenu.classList.remove('open');
+                    menuToggle.classList.toggle('open');
+                } else {
+                    console.warn(`Element with ID ${targetId} not found`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
